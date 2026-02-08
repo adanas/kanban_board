@@ -32,7 +32,6 @@ const initialTasks: Task[] = [
 ];
 
 // localStorageからタスクを読み込む
-const storedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
 const storedTasks =
   typeof localStorage !== "undefined"
     ? localStorage.getItem(TASKS_STORAGE_KEY)
@@ -94,7 +93,6 @@ const updateTasks = (newTasks: Task[]) => {
 watch(
   tasks,
   (newTasks) => {
-    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(newTasks));
     if (typeof localStorage !== "undefined") {
       localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(newTasks));
     }
