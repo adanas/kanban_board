@@ -1,27 +1,51 @@
-import { ref, watch } from 'vue';
-import type { Task, Status } from './types';
+import { ref, watch } from "vue";
+import type { Task, Status } from "./types";
 
 // localStorageから状態を読み込むキー
-const TASKS_STORAGE_KEY = 'kanban-tasks';
+const TASKS_STORAGE_KEY = "kanban-tasks";
 
 // 初期状態のステータス
 const initialStatuses: Status[] = [
-  { id: 1, name: '新規' },
-  { id: 2, name: '作業中' },
-  { id: 3, name: '完了' },
-  { id: 4, name: '中止' },
+  { id: 1, name: "新規" },
+  { id: 2, name: "作業中" },
+  { id: 3, name: "完了" },
+  { id: 4, name: "中止" },
 ];
 
 // 初期状態のタスク（localStorageに何もない場合のサンプル）
 const initialTasks: Task[] = [
-  { id: 1, name: 'Task 1', description: 'This is task 1', statusId: 1, dueDate: '2024-01-01' },
-  { id: 2, name: 'Task 2', description: 'This is task 2', statusId: 1 },
-  { id: 3, name: 'Task 3', description: 'This is task 3', statusId: 2, dueDate: '2024-02-01' },
+  {
+    id: 1,
+    name: "Task 1",
+    description: "This is task 1",
+    statusId: 1,
+    dueDate: "2024-01-01",
+  },
+  { id: 2, name: "Task 2", description: "This is task 2", statusId: 1 },
+  {
+    id: 3,
+    name: "Task 3",
+    description: "This is task 3",
+    statusId: 2,
+    dueDate: "2024-02-01",
+  },
 ];
 
 // localStorageからタスクを読み込む
 const storedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
-const tasks = ref<Task[]>(storedTasks ? JSON.parse(storedTasks) : initialTasks);
+const storedTasks =
+  typeof localStorage !== "undefined"
+    ? localStorage.getItem(TASKS_STORAGE_KEY)
+    : null;
+let loadedTasks: Task[] = initialTasks;
+if (storedTasks) {
+  try {
+    loadedTasks = JSON.parse(storedTasks);
+  } catch (e) {
+    console.error("Failed to parse tasks from localStorage:", e);
+  }
+}
+const tasks = ref<Task[]>(loadedTasks);
 
 // ステータスは固定
 const statuses = ref<Status[]>(initialStatuses);
@@ -30,7 +54,7 @@ const statuses = ref<Status[]>(initialStatuses);
  * 新しいタスクを追加します。
  * @param taskData - 新しいタスクのデータ。
  */
-const addNewTask = (taskData: Omit<Task, 'id' | 'statusId'>) => {
+const addNewTask = (taskData: Omit<Task, "id" | "statusId">) => {
   const newTask: Task = {
     id: Date.now(),
     ...taskData,
@@ -44,7 +68,7 @@ const addNewTask = (taskData: Omit<Task, 'id' | 'statusId'>) => {
  * @param updatedTask - 更新されたタスクオブジェクト。
  */
 const editTask = (updatedTask: Task) => {
-  const index = tasks.value.findIndex(t => t.id === updatedTask.id);
+  const index = tasks.value.findIndex((t) => t.id === updatedTask.id);
   if (index !== -1) {
     tasks.value[index] = updatedTask;
   }
@@ -55,7 +79,7 @@ const editTask = (updatedTask: Task) => {
  * @param taskId - 削除するタスクのID。
  */
 const deleteTask = (taskId: number) => {
-  tasks.value = tasks.value.filter(t => t.id !== taskId);
+  tasks.value = tasks.value.filter((t) => t.id !== taskId);
 };
 
 /**
@@ -71,8 +95,11 @@ watch(
   tasks,
   (newTasks) => {
     localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(newTasks));
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(newTasks));
+    }
   },
-  { deep: true } // ネストされたオブジェクトの変更も検知します。
+  { deep: true }, // ネストされたオブジェクトの変更も検知します。
 );
 
 // ストアとして提供する関数とリアクティブな状態
