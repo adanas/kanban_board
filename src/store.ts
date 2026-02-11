@@ -32,10 +32,7 @@ const initialTasks: Task[] = [
 ];
 
 // localStorageからタスクを読み込む
-const storedTasks =
-  typeof localStorage !== "undefined"
-    ? localStorage.getItem(TASKS_STORAGE_KEY)
-    : null;
+const storedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
 let loadedTasks: Task[] = initialTasks;
 if (storedTasks) {
   try {
@@ -93,9 +90,7 @@ const updateTasks = (newTasks: Task[]) => {
 watch(
   tasks,
   (newTasks) => {
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(newTasks));
-    }
+    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(newTasks));
   },
   { deep: true }, // ネストされたオブジェクトの変更も検知します。
 );
